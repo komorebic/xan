@@ -1,6 +1,7 @@
 // server.js
-// Minimal backend that keeps your Anthropic API key secret on the server
-// and proxies chat requests to it. Serves the custom frontend from /public.
+// Minimal backend that keeps your Gemini API key secret on the server
+// and proxies chat requests to Google's free Gemini API. Serves the
+// custom frontend from /public.
 
 import 'dotenv/config';
 import express from 'express';
@@ -10,28 +11,25 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 
-const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
-const DEFAULT_MODEL = process.env.ANTHROPIC_MODEL || 'claude-fable-5-1';
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const DEFAULT_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 const PORT = process.env.PORT || 3000;
 
-// Only these models can be selected from the UI — prevents arbitrary
-// model strings (and arbitrary spend) being sent from the client.
+// Only these models can be selected from the UI.
 const ALLOWED_MODELS = new Set([
-  'claude-fable-5-1',
-  'claude-opus-5',
-  'claude-sonnet-5',
-  'claude-haiku-4-5-20251001',
+  'gemini-2.5-flash',
+  'gemini-2.0-flash',
 ]);
 
-if (!ANTHROPIC_API_KEY) {
-  console.warn('⚠️  ANTHROPIC_API_KEY is not set. Add it to a .env file before chatting.');
+if (!GEMINI_API_KEY) {
+  console.warn('⚠️  GEMINI_API_KEY is not set. Add it to a .env file before chatting.');
 }
 
 app.use(express.json({ limit: '2mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // POST /api/chat
-// body: { messages: [...], system?: string, model?: string }
+// body: { messages: [{ role: "user"|"assistant", content: string }], system?: string, model?: string }
 app.post('/api/chat', async (req, res) => {
   try {
     const { messages, system, model } = req.body;
@@ -42,31 +40,39 @@ app.post('/api/chat', async (req, res) => {
 
     const selectedModel = ALLOWED_MODELS.has(model) ? model : DEFAULT_MODEL;
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    // Convert our simple {role, content} shape into Gemini's
+    // {role: "user"|"model", parts: [{text}]} shape.
+    const contents = messages.map((m) => ({
+      role: m.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: m.content }],
+    }));
+
+    const body = { contents };
+    if (system) {
+      body.system_instruction = { parts: [{ text: system }] };
+    }
+
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent`;
+
+    const response = await fetch(url, {
       method: 'POST',
       headers: {
         'content-type': 'application/json',
-        'x-api-key': ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
+        'x-goog-api-key': GEMINI_API_KEY,
       },
-      body: JSON.stringify({
-        model: selectedModel,
-        max_tokens: 2048,
-        system: system || undefined,
-        messages,
-      }),
+      body: JSON.stringify(body),
     });
 
     const data = await response.json();
 
     if (!response.ok) {
-      console.error('Anthropic API error:', data);
+      console.error('Gemini API error:', data);
       return res.status(response.status).json({ error: data.error?.message || 'Upstream API error' });
     }
 
-    const text = data.content
-      ?.filter((block) => block.type === 'text')
-      .map((block) => block.text)
+    const text = data.candidates?.[0]?.content?.parts
+      ?.map((p) => p.text)
+      .filter(Boolean)
       .join('\n') || '';
 
     res.json({ text, raw: data });
