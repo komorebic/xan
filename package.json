@@ -1,0 +1,18 @@
+{
+  "name": "custom-ai-chat",
+  "version": "1.0.0",
+  "description": "A custom-branded chat app powered by the Anthropic API",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
