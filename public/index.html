@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Xanthos</title>
+
+<!-- Icons / home screen -->
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png" />
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+<meta name="theme-color" content="#E9E2D3" />
+
+<!-- iOS: makes "Add to Home Screen" open full-screen, no Safari chrome -->
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="Xanthos" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <aside class="rail">
+      <div class="mark" aria-hidden="true">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <path d="M14 2 L24 20 L4 20 Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" fill="none"/>
+        </svg>
+      </div>
+      <button class="rail-btn active" title="Chat" aria-label="Chat">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 4h16v12H8l-4 4V4z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="rail-btn" id="clear-btn" title="New conversation" aria-label="New conversation">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </button>
+      <div class="rail-spacer"></div>
+      <button class="rail-btn" id="settings-btn" title="Settings" aria-label="Settings">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z" stroke="currentColor" stroke-width="1.6"/><path d="M19.4 13a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V19a2 2 0 11-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H4a2 2 0 110-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33h0a1.65 1.65 0 001-1.51V4a2 2 0 114 0v.09a1.65 1.65 0 001 1.51h0a1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82v0a1.65 1.65 0 001.51 1H20a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </aside>
+
+    <main class="stage">
+      <header class="stage-header">
+        <h1 id="app-title">Xanthos</h1>
+        <span class="status" id="status">ready</span>
+      </header>
+
+      <div class="thread" id="thread">
+        <div class="empty-state" id="empty-state">
+          <p class="empty-line">Ask something to begin.</p>
+        </div>
+      </div>
+
+      <form class="composer" id="composer">
+        <textarea
+          id="input"
+          placeholder="Send a message…"
+          rows="1"
+          autofocus
+        ></textarea>
+        <button type="submit" id="send-btn" aria-label="Send">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 12h16M14 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </form>
+    </main>
+  </div>
+
+  <!-- Settings overlay -->
+  <div class="overlay" id="settings-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Settings</h2>
+        <button class="icon-btn" id="close-settings" aria-label="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <label class="field">
+          <span class="field-label">App name</span>
+          <input type="text" id="setting-name" maxlength="24" placeholder="Xanthos" />
+        </label>
+
+        <div class="field">
+          <span class="field-label">Accent color</span>
+          <div class="swatches" id="swatches">
+            <button type="button" class="swatch" data-accent="#B8863B" data-tone="light" style="--sw: #B8863B" aria-label="Gold"></button>
+            <button type="button" class="swatch" data-accent="#4FB8A6" data-tone="light" style="--sw: #4FB8A6" aria-label="Teal"></button>
+            <button type="button" class="swatch" data-accent="#C1694F" data-tone="light" style="--sw: #C1694F" aria-label="Terracotta"></button>
+            <button type="button" class="swatch" data-accent="#6C74B8" data-tone="light" style="--sw: #6C74B8" aria-label="Slate blue"></button>
+            <button type="button" class="swatch" data-accent="#7C9A5C" data-tone="light" style="--sw: #7C9A5C" aria-label="Moss"></button>
+          </div>
+        </div>
+
+        <label class="field">
+          <span class="field-label">Surface</span>
+          <div class="segmented" id="theme-toggle">
+            <button type="button" class="segment active" data-theme="light">Light</button>
+            <button type="button" class="segment" data-theme="dark">Dark</button>
+          </div>
+        </label>
+
+        <label class="field">
+          <span class="field-label">Model</span>
+          <select id="setting-model">
+            <option value="claude-fable-5-1">Claude Fable 5.1</option>
+            <option value="claude-opus-5">Claude Opus 5</option>
+            <option value="claude-sonnet-5">Claude Sonnet 5</option>
+            <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span class="field-label">Persona / instructions <span class="field-hint">(optional)</span></span>
+          <textarea id="setting-system" rows="3" placeholder="e.g. Answer concisely and use dry humor."></textarea>
+        </label>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" id="reset-settings">Reset to defaults</button>
+        <button type="button" class="btn-primary" id="save-settings">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
