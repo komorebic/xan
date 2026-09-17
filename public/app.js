@@ -22,7 +22,7 @@ const DEFAULTS = {
   name: 'Xanthos',
   accent: '#B8863B',
   theme: 'light',
-  model: 'claude-fable-5-1',
+  model: 'gemini-2.5-flash',
   system: '',
 };
 
